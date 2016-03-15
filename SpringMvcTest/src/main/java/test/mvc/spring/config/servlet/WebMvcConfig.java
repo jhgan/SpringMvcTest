@@ -16,7 +16,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 @ComponentScan(basePackages= "test.mvc.spring", includeFilters = @Filter({Controller.class, Service.class}), useDefaultFilters = false)
 public class WebMvcConfig extends WebMvcConfigurationSupport {
 	
-	private static final String[] RESOURCES = {"resources", "css", "js"};
+	private static final String[] RESOURCES = {"css", "js", "webjars"};
 	
 	@Override
 	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
