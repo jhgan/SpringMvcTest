@@ -3,9 +3,8 @@ package test.mvc.spring.config.servlet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
@@ -16,7 +15,6 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 @Configuration
 @ComponentScan(basePackages= "test.mvc.spring", includeFilters = @Filter({Controller.class, Service.class}), useDefaultFilters = false)
-@PropertySource(value = {"classpath:config.properties", "classpath:persistence.properties"})
 public class WebMvcConfig extends WebMvcConfigurationSupport {
 	
 	private static final String[] RESOURCES = {"css", "js", "webjars"};
@@ -52,9 +50,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
 	}
 	
 	@Bean
-	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
-		pspc.setIgnoreUnresolvablePlaceholders(true);
-		return pspc;
+	public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
+		return new PropertySourcesPlaceholderConfigurer();
 	}
 }
