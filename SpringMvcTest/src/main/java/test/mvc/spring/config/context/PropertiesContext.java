@@ -26,6 +26,7 @@ public class PropertiesContext {
 	@PostConstruct
 	public void addXmlProperties() throws Exception {
 		addXmlProperties("classpath:default_properties.xml");
+		addXmlProperties("classpath:api_properties.xml");
 	}
 
 	private void addXmlProperties(String location) throws IOException, InvalidPropertiesFormatException {
