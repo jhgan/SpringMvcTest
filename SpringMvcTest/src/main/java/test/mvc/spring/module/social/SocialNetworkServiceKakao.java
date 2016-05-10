@@ -43,34 +43,37 @@ public class SocialNetworkServiceKakao extends AbstractSocialNetworkService {
 	
 	@Override
 	public Map<String, Object> getUserInfo(String accessToken) {
+		// 1. 요청 url
 		String url = KAKAO_API_HOST + "/v1/user/me";
 		
+		// 2. 헤더 정보
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("content-type", "application/x-www-form-urlencoded;charset=utf-8");
 		headers.put("Authorization", "Bearer " + accessToken);
 		
 		try {
+			// 3. json 형태의 결과값
 			String result = getResponseBody(url, headers, null);
-			logger.info("result : " + result.toString());
+			logger.debug(result);
 			
-			Map<String, Object> data = new HashMap<String, Object>();
+			// 4. parser 객체 생성
 			JSONParser jsonParser = new JSONParser();
+			
+			// 5. string 형태의 json 값 parsing
 			JSONObject jsonObject = (JSONObject)jsonParser.parse(result.toString());
-			JSONObject propertiesJsonObject = (JSONObject) jsonObject.get("properties");
+			
+			// 6. 사용자 정보 map에 저장
 			Map<String, Object> userData = new HashMap<String, Object>();
-			userData.put("userid", (String)propertiesJsonObject.get("nickname")); 
-			userData.put("id", (long)propertiesJsonObject.get("thumbnail_image"));
-			userData.put("nickname", (String)propertiesJsonObject.get("profile_image"));
-			data.put("id", (long)jsonObject.get("id"));
-			return data;
+			userData.put("id", (long)jsonObject.get("id"));
+			
+			JSONObject propertiesJsonObject = (JSONObject) jsonObject.get("properties");
+			userData.put("nickname", (String)propertiesJsonObject.get("nickname"));
+			userData.put("thumbnail_image", (String)propertiesJsonObject.get("thumbnail_image"));
+			userData.put("profile_image", (String)propertiesJsonObject.get("profile_image"));
+			
+			return userData;
 		} catch (ParseException e) {
-			e.printStackTrace();
-			return null;
+			throw new Error(e.getMessage());
 		}
-	}
-
-	@Override
-	public Boolean isSuccess(Map<String, Object> resultUserInfoData) {
-		return null;
 	}
 }

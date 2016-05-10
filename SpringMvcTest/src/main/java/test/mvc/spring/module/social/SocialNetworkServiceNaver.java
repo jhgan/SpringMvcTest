@@ -56,40 +56,30 @@ public class SocialNetworkServiceNaver extends AbstractSocialNetworkService {
 		params.put("response_type", "json");
 		
 		try {
+			// 4. json 형태의 결과값
 			String result = getResponseBody(url, null, params);
-			logger.info("result : " + result.toString());
+			logger.debug(result);
 			
-			Map<String, Object> data = new HashMap<String, Object>();
+			// 5. parser 객체 생성
 			JSONParser jsonParser = new JSONParser();
+			
+			// 6. string 형태의 json 값 parsing
 			JSONObject jsonObject = (JSONObject)jsonParser.parse(result.toString());
+			
+			// 7. 프로퍼티 값이 있는지 확인. 없으면 에러 처리
 			JSONObject propertiesJsonObject = (JSONObject) jsonObject.get("properties");
 			if(propertiesJsonObject == null) {
 				throw new Error("[Naver] User info api error.[error_code: " + (String)jsonObject.get("error_code") + ", message: " + (String)jsonObject.get("message"));
 			}
+			
+			// 8. 사용자 정보 map에 저장
 			Map<String, Object> userData = new HashMap<String, Object>();
 			userData.put("userid", (String)propertiesJsonObject.get("nickname")); 
 			userData.put("id", (long)propertiesJsonObject.get("thumbnail_image"));
 			userData.put("nickname", (String)propertiesJsonObject.get("profile_image"));
-			data.put("id", (long)jsonObject.get("id"));
-			return data;
+			return userData;
 		} catch (ParseException e) {
 			throw new Error(e.getMessage());
-		}
-	}
-	
-	public Boolean isSuccess(Map<String, Object> resultUserInfoData) {
-		if(resultUserInfoData == null) {
-			return false;
-		}
-		
-		if(resultUserInfoData.get("code") == null || resultUserInfoData.get("code") == "") {
-			return false;
-		}
-		
-		if((long)resultUserInfoData.get("code") != 200) {
-			return false;
-		} else {
-			return true;
 		}
 	}
 }

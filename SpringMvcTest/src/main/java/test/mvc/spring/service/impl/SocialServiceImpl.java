@@ -59,17 +59,9 @@ public class SocialServiceImpl implements SocialService {
 		String accessToken = (String) token.get("access_token");
 		
 		Map<String, Object> userInfo = sns.getUserInfo(accessToken);
-//		
-//		if(!sns.isSuccess(resultUserInfoData)) {
-//			return "redirect:/login";
-//		}
-//		
-//		Map<String, Object> userInfoData = (Map<String, Object>) resultUserInfoData.get("result");
-//		
-//		logger.info(userInfoData.toString());
+		
+		logger.info(userInfo.toString());
 		
 		return "redirect:/login";
-		
-//		String resultJson = sns.userInfoData(accessToken);
 	}
 }

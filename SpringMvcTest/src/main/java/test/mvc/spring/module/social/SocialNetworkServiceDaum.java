@@ -8,6 +8,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 public class SocialNetworkServiceDaum extends AbstractSocialNetworkService {
 	private static final Logger logger = LoggerFactory.getLogger(SocialNetworkServiceDaum.class);
@@ -42,69 +43,45 @@ public class SocialNetworkServiceDaum extends AbstractSocialNetworkService {
 	}
 	
 	public Map<String, Object> getUserInfo(String accessToken) {
-		String url = DAUM_HOST + "/user/v1/show";
+		// 1. url 정보
+		String url = DAUM_HOST + "/user/v1/show.json";
 		
-		// 3. 바디 정보
+		// 2. 바디 정보
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("access_token", accessToken);
 		params.put("output", "json");
 		
 		try {
+			// 3. json 형태의 결과값
 			String result = getResponseBody(url, params);
+			logger.debug(result);
 			
-			Map<String, Object> data = new HashMap<String, Object>();
+			// 4. parser 객체 생성
 			JSONParser jsonParser = new JSONParser();
+			
+			// 5. string 형태의 json 값 parsing
 			JSONObject jsonObject = (JSONObject)jsonParser.parse(result.toString());
+			
+			// 6. 코드값 확인. 200이 아니면 에러 처리
+			long code = (long)jsonObject.get("code");
+			if(!HttpStatus.valueOf((int) code).is2xxSuccessful()) {
+				throw new Error("[Daum] User info api error.[error_code: " + code + ", message: " + (String)jsonObject.get("message"));
+			}
+			
+			// 7. 결과 정보 파싱
 			JSONObject resultJsonObject = (JSONObject) jsonObject.get("result");
+			
+			// 8. 사용자 정보 map에 저장
 			Map<String, Object> userData = new HashMap<String, Object>();
 			userData.put("userid", (String)resultJsonObject.get("userid")); 
 			userData.put("id", (long)resultJsonObject.get("id"));
-			String word = (String)resultJsonObject.get("nickname");
-			userData.put("nickname", word);
+			userData.put("nickname", (String)resultJsonObject.get("nickname"));
 			userData.put("imagepath", (String)resultJsonObject.get("imagepath"));
 			userData.put("bigImagePath", (String)resultJsonObject.get("bigImagePath"));
-			data.put("code", (long)jsonObject.get("code"));
-			data.put("message", (String)jsonObject.get("message"));
-			data.put("result", userData);
-			return data;
+			
+			return userData;
 		} catch (ParseException e) {
-			e.printStackTrace();
-			return null;
+			throw new Error(e.getMessage());
 		}
-	}
-	
-	public Boolean isSuccess(Map<String, Object> resultUserInfoData) {
-		if(resultUserInfoData == null) {
-			return false;
-		}
-		
-		if(resultUserInfoData.get("code") == null || resultUserInfoData.get("code") == "") {
-			return false;
-		}
-		
-		if((long)resultUserInfoData.get("code") != 200) {
-			return false;
-		} else {
-			return true;
-		}
-	}
-	
-	public Boolean jsonParse(String result) throws ParseException {
-		JSONParser jsonParser = new JSONParser();
-		JSONObject jsonObject;
-		jsonObject = (JSONObject)jsonParser.parse(result);
-		
-		if((String)jsonObject.get("code") != "200") {
-			return false;
-		}
-		
-		JSONObject jsonObjectResult = (JSONObject)jsonObject.get("result");
-		logger.info(jsonObjectResult.toJSONString());
-		
-		logger.info("id : " + (String)jsonObjectResult.get("id"));
-		logger.info("nickname : " + (String)jsonObjectResult.get("nickname"));
-		logger.info("imagePath : " + (String)jsonObjectResult.get("imagePath"));
-		
-		return true;
 	}
 }

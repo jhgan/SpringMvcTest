@@ -69,8 +69,12 @@ public abstract class AbstractSocialNetworkService {
 		}
 	}
 	
+	/**
+	 * 사용자 정보
+	 * @param accessToken
+	 * @return
+	 */
 	public abstract Map<String, Object> getUserInfo(String accessToken);
-	public abstract Boolean isSuccess(Map<String, Object> resultUserInfoData);
 	
 	/**
 	 * state 값 생성
