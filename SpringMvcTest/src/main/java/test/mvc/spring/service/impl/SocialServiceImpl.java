@@ -32,13 +32,14 @@ public class SocialServiceImpl implements SocialService {
 		
 		logger.info("state : " + state);
 		
-		// 3. state 값을 세션에 저장
-		SessionHandler.setStringInfo(request, SessionHandler.STATE, state);
-		
-		return sns.createOAuthAuthorizationURL(redirectUri, state);
+		return sns.createOAuthAuthorizationURL(request, redirectUri, state);
 	}
 	
-	public String getUserInfo(HttpServletRequest request, String socialType, String code, String state) {
+	public String getUserInfoByOauth1x(HttpServletRequest request, String socialType, String oauth_token, String oauth_verifier) {
+		return "redirect:/login";
+	}
+	
+	public String getUserInfoByOauth2x(HttpServletRequest request, String socialType, String code, String state) {
 		logger.info("socialType : " + socialType + " / code : " + code + " / state : " + state);
 		// 1. 팩토리 생성
 		AbstractSocialNetworkService sns = socialNetworkServiceFactory.create(socialType);

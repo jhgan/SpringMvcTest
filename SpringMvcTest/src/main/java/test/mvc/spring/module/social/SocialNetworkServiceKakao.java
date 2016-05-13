@@ -3,11 +3,15 @@ package test.mvc.spring.module.social;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import test.mvc.spring.common.handler.SessionHandler;
 
 public class SocialNetworkServiceKakao extends AbstractSocialNetworkService {
 	private static final Logger logger = LoggerFactory.getLogger(SocialNetworkServiceKakao.class);
@@ -15,9 +19,10 @@ public class SocialNetworkServiceKakao extends AbstractSocialNetworkService {
 	private static final String KAKAO_AUTH_HOST = "https://kauth.kakao.com";
 	private static final String KAKAO_API_HOST = "https://kapi.kakao.com";
 	private static final String KAKAO_CLIENT_ID = "66d8c42a4ca66c04e317cb2669ac0e4d";
-	private static final String KAKAO_CLIENT_CALLBACK = "/social/kakao/callback";
+	private static final String KAKAO_CLIENT_CALLBACK = "/social/kakao/oauth2.0/callback";
 	
-	public String createOAuthAuthorizationURL(String redirectUri, String state) {
+	public String createOAuthAuthorizationURL(HttpServletRequest request, String redirectUri, String state) {
+		SessionHandler.setStringInfo(request, SessionHandler.STATE, state);
 		return KAKAO_AUTH_HOST + "/oauth/authorize?client_id=" + KAKAO_CLIENT_ID + "&response_type=code&redirect_uri=" +redirectUri + KAKAO_CLIENT_CALLBACK +"&state=" + state;
 	}
 
@@ -38,7 +43,7 @@ public class SocialNetworkServiceKakao extends AbstractSocialNetworkService {
 		params.put("state", state);
 		
 		// 4. accessType 결과
-		return tokenJsonConvertByMap(getResponseBody(requestUrl, headers, params));
+		return tokenJsonConvertByMap(httpPost(requestUrl, headers, params));
 	}
 	
 	@Override
@@ -53,7 +58,7 @@ public class SocialNetworkServiceKakao extends AbstractSocialNetworkService {
 		
 		try {
 			// 3. json 형태의 결과값
-			String result = getResponseBody(url, headers, null);
+			String result = httpPost(url, headers, null);
 			logger.debug(result);
 			
 			// 4. parser 객체 생성

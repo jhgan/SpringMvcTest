@@ -3,6 +3,8 @@ package test.mvc.spring.module.social;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -10,15 +12,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
+import test.mvc.spring.common.handler.SessionHandler;
+
 public class SocialNetworkServiceDaum extends AbstractSocialNetworkService {
 	private static final Logger logger = LoggerFactory.getLogger(SocialNetworkServiceDaum.class);
 	
 	private static final String DAUM_HOST = "https://apis.daum.net";
 	private static final String DAUM_CLIENT_KEY = "5710146924007080108";
 	private static final String DAUM_CLIENT_SECRET = "95de935ac3accea52d0295de9eab5fa8";
-	private static final String DAUM_CLIENT_CALLBACK = "/social/daum/callback";
+	private static final String DAUM_CLIENT_CALLBACK = "/social/daum/oauth2.0/callback";
 	
-	public String createOAuthAuthorizationURL(String redirectUri, String state) {
+	public String createOAuthAuthorizationURL(HttpServletRequest request, String redirectUri, String state) {
+		SessionHandler.setStringInfo(request, SessionHandler.STATE, state);
 		return DAUM_HOST + "/oauth2/authorize?client_id=" + DAUM_CLIENT_KEY + "&redirect_uri=" + redirectUri + DAUM_CLIENT_CALLBACK + "&response_type=code";
 	}
 	
@@ -39,7 +44,7 @@ public class SocialNetworkServiceDaum extends AbstractSocialNetworkService {
 		params.put("grant_type", "authorization_code");
 		
 		// 4. accessType 결과
-		return tokenJsonConvertByMap(getResponseBody(requestUrl, headers, params));
+		return tokenJsonConvertByMap(httpPost(requestUrl, headers, params));
 	}
 	
 	public Map<String, Object> getUserInfo(String accessToken) {
@@ -47,13 +52,13 @@ public class SocialNetworkServiceDaum extends AbstractSocialNetworkService {
 		String url = DAUM_HOST + "/user/v1/show.json";
 		
 		// 2. 바디 정보
-		Map<String, Object> params = new HashMap<String, Object>();
+		Map<String, String> params = new HashMap<String, String>();
 		params.put("access_token", accessToken);
 		params.put("output", "json");
 		
 		try {
 			// 3. json 형태의 결과값
-			String result = getResponseBody(url, params);
+			String result = httpGet(url, null, params);
 			logger.debug(result);
 			
 			// 4. parser 객체 생성

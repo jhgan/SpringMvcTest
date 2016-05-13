@@ -3,11 +3,15 @@ package test.mvc.spring.module.social;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import test.mvc.spring.common.handler.SessionHandler;
 
 public class SocialNetworkServiceNaver extends AbstractSocialNetworkService {
 	private static final Logger logger = LoggerFactory.getLogger(SocialNetworkServiceNaver.class);
@@ -16,10 +20,10 @@ public class SocialNetworkServiceNaver extends AbstractSocialNetworkService {
 	private static final String NAVER_API_HOST = "https://openapi.naver.com";
 	private static final String NAVER_CLIENT_KEY = "yARxDvyeS0nTwisjXTHJ";
 	private static final String NAVER_CLIENT_SECRET = "DItYX6E4Qg";
-	private static final String NAVER_CLIENT_CALLBACK = "/social/naver/callback";
+	private static final String NAVER_CLIENT_CALLBACK = "/social/naver/oauth2.0/callback";
 	
-	public String createOAuthAuthorizationURL(String redirectUri, String state) {
-//		return DAUM_HOST + "/oauth2/authorize?client_id=" + DAUM_CLIENT_KEY + "&redirect_uri=" + redirect_uri + DAUM_CLIENT_CALLBACK + "&response_type=code";
+	public String createOAuthAuthorizationURL(HttpServletRequest request, String redirectUri, String state) {
+		SessionHandler.setStringInfo(request, SessionHandler.STATE, state);
 		return NAVER_AUTH_HOST + "/oauth2.0/authorize?client_id=" + NAVER_CLIENT_KEY + "&response_type=code&redirect_uri=" + redirectUri + NAVER_CLIENT_CALLBACK +"&state=" + state;
 	}
 	
@@ -40,25 +44,21 @@ public class SocialNetworkServiceNaver extends AbstractSocialNetworkService {
 		params.put("state", state);
 		
 		// 4. accessType 결과
-		return tokenJsonConvertByMap(getResponseBody(requestUrl, headers, params));
+		return tokenJsonConvertByMap(httpPost(requestUrl, headers, params));
 	}
 	
 	public Map<String, Object> getUserInfo(String accessToken) {
 		// 1. url 정보 
-		String url = NAVER_API_HOST + "/nidlogin/nid/getUserProfile.json";
+		String url = NAVER_API_HOST + "/v1/nid/me";
 		
 		// 2. 헤더 정보
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("Authorization", "Bearer " + accessToken);
 		
-		// 3. 바디 정보
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("response_type", "json");
-		
 		try {
 			// 4. json 형태의 결과값
-			String result = getResponseBody(url, null, params);
-			logger.debug(result);
+			String result = httpGet(url, headers, null);
+			logger.info(result);
 			
 			// 5. parser 객체 생성
 			JSONParser jsonParser = new JSONParser();

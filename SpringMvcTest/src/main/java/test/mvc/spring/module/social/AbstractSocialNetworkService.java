@@ -12,7 +12,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -24,6 +25,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -41,7 +44,7 @@ public abstract class AbstractSocialNetworkService {
 	 * @param state
 	 * @return
 	 */
-	public abstract String createOAuthAuthorizationURL(String redirectUri, String state);
+	public abstract String createOAuthAuthorizationURL(HttpServletRequest request, String redirectUri, String state);
 	/**
 	 * 토큰 정보 획득
 	 * @param code
@@ -91,55 +94,63 @@ public abstract class AbstractSocialNetworkService {
 	 * @param params
 	 * @return
 	 */
-	protected String getResponseBody(String url, Map<String, Object> params) {
-		int index = 0;
-		StringBuffer temp = new StringBuffer();
+	protected String httpGet(String url, Map<String, String> headers, Map<String, String> params) {
+		HttpClient httpclient = HttpClientBuilder.create().build();
+		HttpGet get = new HttpGet(url);
 		
-		for(Entry<String, Object> entry : params.entrySet()) {
-			if(index == 0) {
-				temp.append("?" + entry.getKey() + "=" + entry.getValue());
-			} else {
-				temp.append("&" + entry.getKey() + "=" + entry.getValue());
+		// 1. 헤더 설정
+		if(headers != null) {
+			Iterator<String> it = headers.keySet().iterator();
+			while(it.hasNext()){
+				String key = it.next();
+				String val = headers.get(key);
+				get.addHeader(key, val);
 			}
-			
-			index++;
 		}
 		
-		String result = "";
+		// 2. 파라미터값 설정
+		if(params != null) {
+			HttpParams httpParams = new BasicHttpParams();
+			
+			Iterator<String> itParam = params.keySet().iterator();
+			while(itParam.hasNext()){
+				String key = itParam.next();
+				String val = params.get(key);
+				
+				httpParams.setParameter(key, val);
+			}
+		}
 		
-		// HttpClient 생성
-		HttpClient httpclient = HttpClientBuilder.create().build();
+		StringBuffer result = new StringBuffer();
+		
 		try {
-			
-			// HttpGet생성
-			HttpGet httpget = new HttpGet(url + temp.toString());
-			
-			HttpResponse response = httpclient.execute(httpget);
+			HttpResponse response = httpclient.execute(get);
 			HttpEntity entity = response.getEntity();
 
 			// 응답 결과
 			if (entity != null) {
-				BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-				
+				BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "utf-8"), 8);
 				String line = "";
 				while ((line = rd.readLine()) != null) {
-					result = line;
+					result.append(new String(URLDecoder.decode(line, "UTF-8")));
 				}
+				
+				logger.info(result.toString());
+				
+				return result.toString();
 			}
 			
-			httpget.abort();
+			get.abort();
 			httpclient.getConnectionManager().shutdown();
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
+			throw new Error(e.getMessage());
+		}finally {
 			httpclient.getConnectionManager().shutdown();
 		}
 		
-		logger.info(result);
+		logger.info(result.toString());
 		
-		return result;
+		return result.toString();
 	}
 	
 	/**
@@ -151,7 +162,7 @@ public abstract class AbstractSocialNetworkService {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	protected String getResponseBody(String url, Map<String, String> header, Map<String, String> params) {
+	protected String httpPost(String url, Map<String, String> header, Map<String, String> params) {
 		HttpClient client = HttpClientBuilder.create().build();
 		HttpPost post = new HttpPost(url);
 		
@@ -199,6 +210,9 @@ public abstract class AbstractSocialNetworkService {
 				while ((line = rd.readLine()) != null) {
 					result.append(new String(URLDecoder.decode(line, "UTF-8")));
 				}
+				
+				logger.info(result.toString());
+				
 				return result.toString();
 			}
 		} catch (IOException e) {
