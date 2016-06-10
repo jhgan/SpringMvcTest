@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -44,7 +43,7 @@ public abstract class AbstractSocialNetworkService {
 	 * @param state
 	 * @return
 	 */
-	public abstract String createOAuthAuthorizationURL(HttpServletRequest request, String redirectUri, String state);
+	public abstract String createOAuthAuthorizationURL(HttpServletRequest request, String redirectUri, String stateToken);
 	/**
 	 * 토큰 정보 획득
 	 * @param code
@@ -52,6 +51,7 @@ public abstract class AbstractSocialNetworkService {
 	 * @return
 	 */
 	public abstract Map<String, Object> getToken(String code, String state);
+	
 	/**
 	 * json 형태의 token 값을 map 형태로 변환
 	 * @param json
@@ -77,15 +77,15 @@ public abstract class AbstractSocialNetworkService {
 	 * @param accessToken
 	 * @return
 	 */
-	public abstract Map<String, Object> getUserInfo(String accessToken);
+	public abstract Map<String, Object> getUserInfo(String accessToken, HttpServletRequest servletRequest);
 	
 	/**
-	 * state 값 생성
+	 * Generates a secure state token
 	 * @return
 	 */
-	public String createState() {
+	public String generateStateToken(String socialType) {
 		SecureRandom random = new SecureRandom();
-		return new BigInteger(130, random).toString(32);
+		return socialType + ";" + random.nextInt();
 	}
 	
 	/**

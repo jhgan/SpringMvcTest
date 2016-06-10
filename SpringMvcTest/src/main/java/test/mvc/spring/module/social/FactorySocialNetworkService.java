@@ -10,7 +10,7 @@ public class FactorySocialNetworkService {
 		case "facebook":
 			break;
 		case "google":
-			break;
+			return new SocialNetworkServiceGoogle();
 		case "kakao":
 			return new SocialNetworkServiceKakao();
 		case "daum":

@@ -47,7 +47,7 @@ public class SocialNetworkServiceKakao extends AbstractSocialNetworkService {
 	}
 	
 	@Override
-	public Map<String, Object> getUserInfo(String accessToken) {
+	public Map<String, Object> getUserInfo(String accessToken, HttpServletRequest request) {
 		// 1. 요청 url
 		String url = KAKAO_API_HOST + "/v1/user/me";
 		

@@ -69,7 +69,7 @@ public class SocialNetworkServiceTwitter extends AbstractSocialNetworkService {
 		return null;
 	}
 	
-	public Map<String, Object> getUserInfo(String accessToken) {
+	public Map<String, Object> getUserInfo(String accessToken, HttpServletRequest request) {
 //		// 1. url 정보
 //		String url = DAUM_HOST + "/user/v1/show.json";
 //		

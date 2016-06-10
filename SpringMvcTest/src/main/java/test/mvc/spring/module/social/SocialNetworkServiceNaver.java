@@ -47,7 +47,8 @@ public class SocialNetworkServiceNaver extends AbstractSocialNetworkService {
 		return tokenJsonConvertByMap(httpPost(requestUrl, headers, params));
 	}
 	
-	public Map<String, Object> getUserInfo(String accessToken) {
+	public Map<String, Object> getUserInfo(String accessToken, HttpServletRequest request) {
+		logger.info(accessToken);
 		// 1. url 정보 
 		String url = NAVER_API_HOST + "/v1/nid/me";
 		

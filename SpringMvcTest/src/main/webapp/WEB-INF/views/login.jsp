@@ -16,7 +16,7 @@
 			<button type="button" class="btn btn-lg btn-default" onClick="getAuthorizationUrl('daum')">DAUM</button>
 			<button type="button" class="btn btn-lg btn-primary" onClick="getAuthorizationUrl('kakao')">KAKAO</button>
 			<button type="button" class="btn btn-lg btn-success" onClick="getAuthorizationUrl('naver')">NAVER</button>
-			<button type="button" class="btn btn-lg btn-info">Info</button>
+			<button type="button" class="btn btn-lg btn-info" onClick="getAuthorizationUrl('google')">GOOGLE</button>
 			<button type="button" class="btn btn-lg btn-warning">Warning</button>
 			<button type="button" class="btn btn-lg btn-danger">Danger</button>
 			<button type="button" class="btn btn-lg btn-link">Link</button>

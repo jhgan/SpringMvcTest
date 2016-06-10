@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import test.mvc.spring.common.code.CommonCode;
 import test.mvc.spring.common.handler.SessionHandler;
 import test.mvc.spring.module.social.AbstractSocialNetworkService;
 import test.mvc.spring.module.social.FactorySocialNetworkService;
@@ -28,17 +29,19 @@ public class SocialServiceImpl implements SocialService {
 		
 		// 2. uri와 state 생성
 		String redirectUri = request.getRequestURL().toString().replaceAll(request.getRequestURI(), "") + request.getContextPath();
-		String state = sns.createState();
+		String state = sns.generateStateToken(socialType);
 		
 		logger.info("state : " + state);
 		
 		return sns.createOAuthAuthorizationURL(request, redirectUri, state);
 	}
 	
+	@Override
 	public String getUserInfoByOauth1x(HttpServletRequest request, String socialType, String oauth_token, String oauth_verifier) {
 		return "redirect:/login";
 	}
 	
+	@Override
 	public String getUserInfoByOauth2x(HttpServletRequest request, String socialType, String code, String state) {
 		logger.info("socialType : " + socialType + " / code : " + code + " / state : " + state);
 		// 1. 팩토리 생성
@@ -46,7 +49,7 @@ public class SocialServiceImpl implements SocialService {
 		
 		// 2. 세션에 담긴 state 값 조회
 		String storedState = SessionHandler.getStringInfo(request, SessionHandler.STATE);
-		logger.info("state : " + state);
+		logger.info("state : " + storedState);
 		
 		// 2.1. state 값 인증
 		if(!state.equals("") && !state.equals(storedState)) {
@@ -55,11 +58,19 @@ public class SocialServiceImpl implements SocialService {
 			SessionHandler.removeSessionInfo(request, SessionHandler.STATE);
 		}
 		
-		// 3. token 획득
-		Map<String, Object> token = sns.getToken(code, state);
-		String accessToken = (String) token.get("access_token");
+		Map<String, Object> userInfo = null;
 		
-		Map<String, Object> userInfo = sns.getUserInfo(accessToken);
+		if(!socialType.equals(CommonCode.SocialType.GOOGLE.code)) {
+			// 3. token 획득
+			Map<String, Object> token = sns.getToken(code, state);
+			String accessToken = (String) token.get("access_token");
+			
+			// 4. 사용자 정보
+			userInfo = sns.getUserInfo(accessToken, null);
+		} else {
+			userInfo = sns.getUserInfo(code, request);
+		}
+		
 		
 		logger.info(userInfo.toString());
 		
