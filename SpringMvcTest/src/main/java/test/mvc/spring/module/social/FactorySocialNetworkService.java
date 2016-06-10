@@ -18,7 +18,7 @@ public class FactorySocialNetworkService {
 		case "naver":
 			return new SocialNetworkServiceNaver();
 		case "twitter":
-			break;
+			return new SocialNetworkServiceTwitter();
 		default:
 			break;
 		}

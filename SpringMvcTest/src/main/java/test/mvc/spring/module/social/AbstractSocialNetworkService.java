@@ -77,7 +77,7 @@ public abstract class AbstractSocialNetworkService {
 	 * @param accessToken
 	 * @return
 	 */
-	public abstract Map<String, Object> getUserInfo(String accessToken, HttpServletRequest servletRequest);
+	public abstract Map<String, Object> user(String accessToken, String oauth_token, String oauth_verifier, HttpServletRequest servletRequest);
 	
 	/**
 	 * Generates a secure state token

@@ -38,6 +38,11 @@ public class SocialServiceImpl implements SocialService {
 	
 	@Override
 	public String getUserInfoByOauth1x(HttpServletRequest request, String socialType, String oauth_token, String oauth_verifier) {
+		// 1. 팩토리 생성
+		AbstractSocialNetworkService sns = socialNetworkServiceFactory.create(socialType);
+		
+		Map<String, Object> userInfo = sns.user(null, oauth_token, oauth_verifier, request);
+		
 		return "redirect:/login";
 	}
 	
@@ -66,9 +71,9 @@ public class SocialServiceImpl implements SocialService {
 			String accessToken = (String) token.get("access_token");
 			
 			// 4. 사용자 정보
-			userInfo = sns.getUserInfo(accessToken, null);
+			userInfo = sns.user(accessToken, null, null, null);
 		} else {
-			userInfo = sns.getUserInfo(code, request);
+			userInfo = sns.user(code, null, null, request);
 		}
 		
 		

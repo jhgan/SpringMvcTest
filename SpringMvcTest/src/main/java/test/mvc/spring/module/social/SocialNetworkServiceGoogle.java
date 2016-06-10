@@ -78,7 +78,7 @@ public class SocialNetworkServiceGoogle extends AbstractSocialNetworkService {
 	}
 	
 	@Override
-	public Map<String, Object> getUserInfo(String authCode, HttpServletRequest servletRequest) {
+	public Map<String, Object> user(String authCode, String notUsed, String notUsed2, HttpServletRequest servletRequest) {
 		String callbackUrl = servletRequest.getRequestURL().toString().replaceAll(servletRequest.getRequestURI(), "") + servletRequest.getContextPath() + CALLBACK_URL;
 		
 		try {
